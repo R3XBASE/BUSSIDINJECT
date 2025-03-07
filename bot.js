@@ -14,10 +14,10 @@ server.listen(process.env.PORT || 8080, () => {
 
 // Konfigurasi PostgreSQL dari environment variables untuk Neon
 const pool = new Pool({
-  host: process.env.DB_HOST || 'ep-long-morning-a591x3lo-pooler.us-east-2.aws.neon.tech',
-  user: process.env.DB_USER || 'telegram_bot_db_owner',
-  password: process.env.DB_PASSWORD || 'npg_DxCeN8k5SByz',
-  database: process.env.DB_NAME || 'telegram_bot_db',
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
   ssl: { rejectUnauthorized: false } // Neon memerlukan SSL, atur sesuai kebutuhan
 });
 
