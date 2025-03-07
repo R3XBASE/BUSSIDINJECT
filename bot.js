@@ -105,7 +105,7 @@ async function registerDevice(telegramId, deviceId) {
 }
 
 // Start Command /bussid
-bot.bussid(async (ctx) => {
+bot.start(async (ctx) => {
   const telegramId = ctx.from.id.toString();
   const userInfo = await isUserRegisteredAndApproved(telegramId);
 
