@@ -104,31 +104,39 @@ async function registerDevice(telegramId, deviceId) {
   }
 }
 
-// Command /start
-bot.start(async (ctx) => {
+// Start Command /bussid
+bot.bussid(async (ctx) => {
   const telegramId = ctx.from.id.toString();
   const userInfo = await isUserRegisteredAndApproved(telegramId);
 
   if (!userInfo.registered) {
-    return ctx.reply('Masukkan Device ID Anda terlebih dahulu:');
+    return ctx.reply('ᗰᗩՏᑌKKᗩᑎ ᗪᗴᐯIᑕᗴ ᗩᑎᗪᗩ');
   }
 
   if (!userInfo.approved) {
-    return ctx.reply('Device ID Anda belum disetujui oleh admin. Silakan tunggu.');
+    return ctx.reply('ᗪᗴᐯIᑕᗴ Iᗪ ᗩᑎᗪᗩ ᗷᗴᒪᑌᗰ ᗪI ՏᗴTᑌᒍᑌI ᗰOᕼOᑎ Tᑌᑎᘜᘜᑌ');
   }
 
   const inlineKeyboard = Markup.inlineKeyboard([
-    [Markup.button.callback('Inject 5 Juta', 'inject_5000000')],
-    [Markup.button.callback('Inject 10 Juta', 'inject_10000000')],
-    [Markup.button.callback('Inject 20 Juta', 'inject_20000000')],
-    [Markup.button.callback('Inject 50 Juta', 'inject_50000000')],
-    [Markup.button.callback('Inject 100 Juta', 'inject_100000000')],
-    [Markup.button.callback('Inject 200 Juta', 'inject_200000000')],
-    [Markup.button.callback('Inject 500 Juta', 'inject_500000000')],
-    [Markup.button.callback('Sedot UB (-2.179.683.487)', 'sedot_-2179683487')]
+    [
+      Markup.button.callback('💰 5 𝘑𝘜𝘛𝘈', 'inject_5000000'),
+      Markup.button.callback('💎 10 𝘑𝘜𝘛𝘈', 'inject_10000000')
+    ],
+    [
+      Markup.button.callback('🌟 20 𝘑𝘜𝘛𝘈', 'inject_20000000'),
+      Markup.button.callback('🔥 50 𝘑𝘜𝘛𝘈', 'inject_50000000')
+    ],
+    [
+      Markup.button.callback('💸 100 𝘑𝘜𝘛𝘈', 'inject_100000000'),
+      Markup.button.callback('💵 200 𝘑𝘜𝘛𝘈', 'inject_200000000')
+    ],
+    [
+      Markup.button.callback('💲 500 𝘑𝘜𝘛𝘈', 'inject_500000000'),
+      Markup.button.callback('⬇️ 𝘚𝘌𝘋𝘖𝘛 𝘜𝘉 (-2𝘔)', 'sedot_-2179683487')
+    ]
   ]);
 
-  ctx.reply('Pilih opsi inject atau sedot UB:', inlineKeyboard);
+  ctx.reply('🎮 ᑭIᒪIᕼ OᑭՏI IᑎᒍᗴᑕT ᗩTᗩᑌ ՏᗴᗪOT 🎮', inlineKeyboard);
 });
 
 // Tangani callback query dari inline keyboard
@@ -140,7 +148,7 @@ bot.action(/inject_(\d+)/, async (ctx) => {
 
 bot.action('sedot_-2179683487', async (ctx) => {
   const telegramId = ctx.from.id.toString();
-  await handleInject(ctx, telegramId, -2179683487); // Nilai negatif untuk sedot UB
+  await handleInject(ctx, telegramId, -2179683487);
 });
 
 // Fungsi handler untuk inject
@@ -148,16 +156,16 @@ async function handleInject(ctx, telegramId, value) {
   const userInfo = await isUserRegisteredAndApproved(telegramId);
 
   if (!userInfo.registered) {
-    return ctx.answerCbQuery('Pengguna tidak terdaftar!');
+    return ctx.answerCbQuery('ᗩᑎᗪᗩ ᗷᗴᒪᑌᗰ TᗴᖇᗪᗩᖴTᗩᖇ');
   }
 
   if (!userInfo.approved) {
-    return ctx.answerCbQuery('Pengguna belum disetujui!');
+    return ctx.answerCbQuery('ᗩᑎᗪᗩ ᗷᗴᒪᑌᗰ ᗪIՏᗴTᑌᒍᑌI');
   }
 
   const deviceId = userInfo.deviceId;
   if (!deviceId) {
-    return ctx.answerCbQuery('Device ID tidak ditemukan!');
+    return ctx.answerCbQuery('ᗪᗴᐯIᑕᗴ Iᗪ TIᗪᗩK ᗪITᗴᗰᑌKᗩᑎ');
   }
 
   try {
@@ -169,19 +177,19 @@ async function handleInject(ctx, telegramId, value) {
       } else {
         const action = value < 0 ? 'Sedot' : 'Inject';
         const absValue = Math.abs(value).toLocaleString();
-        ctx.answerCbQuery(`${action} ${absValue} UB berhasil!`);
-        ctx.reply(`${action} ${absValue} UB: ${JSON.stringify(result, null, 2)}`);
+        ctx.answerCbQuery(`${action} ${absValue} ᑌᗷ ᗷᗴᖇᕼᗩՏIᒪ!`);
+        ctx.reply(`${action} ${absValue} ՏᑌKՏᗴՏ ᗯᗩK`);
       }
     } else {
-      ctx.answerCbQuery('Gagal login dengan Device ID Anda.');
+      ctx.answerCbQuery('ᘜᗩᘜᗩᒪ ᒪOᘜIᑎ ᗪᗴᑎᘜᗩᑎ ᗪᗴᐯIᑕᗴ Iᗪ ᗩᑎᗪᗩ');
     }
   } catch (error) {
     console.error('Inject error:', error);
-    ctx.answerCbQuery(`Terjadi kesalahan saat ${value < 0 ? 'sedot' : 'inject'} UB!`);
+    ctx.answerCbQuery(`TᗴᖇᒍᗩᗪI KᗴՏᗩᒪᗩᕼᗩᑎ ՏᗩᗩT ${value < 0 ? 'sedot' : 'inject'} ᑌᗷ!`);
   }
 }
 
-// Tangani pesan teks manual (opsional, jika ingin input custom)
+// Tangani pesan teks manual
 bot.on('text', async (ctx) => {
   const telegramId = ctx.from.id.toString();
   const text = ctx.message.text;
@@ -190,29 +198,37 @@ bot.on('text', async (ctx) => {
 
   if (!userInfo.registered) {
     await registerDevice(telegramId, text);
-    return ctx.reply('Device ID Anda telah dikirim untuk persetujuan admin. Tunggu hingga disetujui.');
+    return ctx.reply('ᗪᗴᐯIᑕᗴ Iᗪ ᗩᑎᗪᗩ Tᗴᒪᗩᕼ ᗪIKIᖇIᗰ ᕼᑌᗷᑌᑎᘜI ᗩᗪᗰIᑎ ᑌᑎTᑌK ᑭᗴᖇՏᗴTᑌᒍᑌᗩᑎ');
   }
 
   if (!userInfo.approved) {
-    return ctx.reply('Device ID Anda belum disetujui oleh admin. Silakan tunggu.');
+    return ctx.reply('ᗪᗴᐯIᑕᗴ Iᗪ ᗩᑎᗪᗩ ᗷᗴᒪᑌᗰ ᗪIՏᗴTᑌᒍᑌI ᗩᗪᗰIᑎ ᗰOᕼOᑎ ᗷᗴᖇՏᗩᗷᗩᖇ');
   }
 
   if (text === 'Inject UB') {
     const inlineKeyboard = Markup.inlineKeyboard([
-      [Markup.button.callback('Inject 5 Juta', 'inject_5000000')],
-      [Markup.button.callback('Inject 10 Juta', 'inject_10000000')],
-      [Markup.button.callback('Inject 20 Juta', 'inject_20000000')],
-      [Markup.button.callback('Inject 50 Juta', 'inject_50000000')],
-      [Markup.button.callback('Inject 100 Juta', 'inject_100000000')],
-      [Markup.button.callback('Inject 200 Juta', 'inject_200000000')],
-      [Markup.button.callback('Inject 500 Juta', 'inject_500000000')],
-      [Markup.button.callback('Sedot UB (-2.179.683.487)', 'sedot_-2179683487')]
+      [
+        Markup.button.callback('💰 5 𝘑𝘜𝘛𝘈', 'inject_5000000'),
+        Markup.button.callback('💎 10 𝘑𝘜𝘛𝘈', 'inject_10000000')
+      ],
+      [
+        Markup.button.callback('🌟 20 𝘑𝘜𝘛𝘈', 'inject_20000000'),
+        Markup.button.callback('🔥 50 𝘑𝘜𝘛𝘈', 'inject_50000000')
+      ],
+      [
+        Markup.button.callback('💸 100 𝘑𝘜𝘛𝘈', 'inject_100000000'),
+        Markup.button.callback('💵 200 𝘑𝘜𝘛𝘈', 'inject_200000000')
+      ],
+      [
+        Markup.button.callback('💲 500 𝘑𝘜𝘛𝘈', 'inject_500000000'),
+        Markup.button.callback('⬇️ 𝘚𝘌𝘋𝘖𝘛 𝘜𝘉 (-2𝘔)', 'sedot_-2179683487')
+      ]
     ]);
-    return ctx.reply('Pilih jumlah UB:', inlineKeyboard);
-  } else if (text === 'Cek Status') {
-    ctx.reply('Fitur ini belum diimplementasikan.');
-  } else if (text === 'Bantuan') {
-    ctx.reply('Gunakan menu untuk navigasi. Hubungi admin jika ada masalah.');
+    return ctx.reply('🎮 ᗪIՏᑭᒪᗩY ᗰᗴᑎᑌ 🎮', inlineKeyboard);
+  } else if (text === 'ᑕᗴK ՏTᗩTᑌՏ') {
+    ctx.reply('ᑕOᗰIᑎᘜ ՏOOᑎ...!');
+  } else if (text === 'ᗷᗩᑎTᑌᗩᑎ') {
+    ctx.reply('🎮 ᘜᑌᑎᗩKᗩᑎ ᗰᗴᑎᑌ ᑎᗩᐯIᘜᗩՏI ᑌᑎTᑌK ᕼᑌᗷᑌᑎᘜI ᗩᗪᗰIᑎ ᒍIKᗩ ᗩᗪᗩ ᗰᗩՏᗩᒪᗩᕼ! 🎮');
   }
 });
 
