@@ -1,16 +1,12 @@
 const { Telegraf } = require('telegraf');
 const fetch = require('node-fetch');
 const { Pool } = require('pg');
+const express = require('express');
 const http = require('http');
 
-// Server HTTP untuk Koyeb
-const server = http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('Bot is running');
-});
-server.listen(process.env.PORT || 8080, () => {
-  console.log(`Server running on port ${process.env.PORT || 8080}`);
-});
+// Inisialisasi Express
+const app = express();
+const server = http.createServer(app);
 
 // Konfigurasi PostgreSQL dari environment variables untuk Neon
 const pool = new Pool({
@@ -22,6 +18,16 @@ const pool = new Pool({
 });
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
+
+// Middleware Express untuk health check
+app.get('/health', (req, res) => {
+  res.status(200).send('OK'); // Respon sederhana untuk health check
+});
+
+// Server HTTP untuk Koyeb
+server.listen(process.env.PORT || 8080, () => {
+  console.log(`Server running on port ${process.env.PORT || 8080}`);
+});
 
 // Fungsi PlayFab Login
 async function loginWithDevice(deviceId) {
@@ -161,8 +167,14 @@ bot.launch().then(() => {
 });
 
 // Graceful shutdown
-process.once('SIGINT', () => bot.stop('SIGINT'));
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
+process.once('SIGINT', () => {
+  bot.stop('SIGINT');
+  pool.end(() => process.exit(0));
+});
+process.once('SIGTERM', () => {
+  bot.stop('SIGTERM');
+  pool.end(() => process.exit(0));
+});
 
 // Tutup pool saat aplikasi berhenti
 process.on('exit', () => pool.end());
