@@ -106,18 +106,18 @@ async function registerDevice(telegramId, deviceId) {
   }
 }
 
-// Command /start dengan penanganan error
-bot.start(async (ctx) => {
+// Command /inject dengan penanganan error
+bot.command('inject', async (ctx) => {
   try {
     const telegramId = ctx.from.id.toString();
     const userInfo = await isUserRegisteredAndApproved(telegramId);
 
     if (!userInfo.registered) {
-      return ctx.reply('ᗰᗩՏᑌKKᗩᑎ ᗪᗴᐯIᑕᗴ ᗩᑎᗪᗩ');
+      return await ctx.reply('ᗰᗩՏᑌKKᗩᑎ ᗪᗴᐯIᑕᗴ Iᗪ ᗩᑎᗪᗩ');
     }
 
     if (!userInfo.approved) {
-      return ctx.reply('ᗪᗴᐯIᑕᗴ Iᗪ ᗩᑎᗪᗩ ᗷᗴᒪᑌᗰ ᗪI ՏᗴTᑌᒍᑌI ᗰOᕼOᑎ Tᑌᑎᘜᘜᑌ');
+      return await ctx.reply('ᗪᗴᐯIᑕᗴ Iᗪ ᗩᑎᗪᗩ ᗷᗴᒪᑌᗰ ᗪI ՏᗴTᑌᒍᑌI ᗰOᕼOᑎ Tᑌᑎᘜᘜᑌ');
     }
 
     const inlineKeyboard = Markup.inlineKeyboard([
@@ -135,13 +135,13 @@ bot.start(async (ctx) => {
       ],
       [
         Markup.button.callback('💲 500 𝘑𝘜𝘛𝘈', 'inject_500000000'),
-        Markup.button.callback('⬇️ 𝘚𝘌𝘋𝘖𝘛 𝘜𝘉 (-2𝘔)', 'sedot_-2179683487')
+        Markup.button.callback('⬇️ 𝘚𝘌𝘋𝘖𝘛 𝘜𝘉 (-2𝘔)', 'sedot_-2147483647')
       ]
     ]);
 
     await ctx.reply('🎮 ᑭIᒪIᕼ OᑭՏI IᑎᒍᗴᑕT ᗩTᗩᑌ ՏᗴᗪOT 🎮', inlineKeyboard);
   } catch (error) {
-    console.error('Start command error:', error.message);
+    console.error('Inject command error:', error.message);
     await ctx.reply('ᗩᗪᗩ KᗴՏᗩᒪᗩᕼᗩᑎ!');
   }
 });
@@ -158,10 +158,10 @@ bot.action(/inject_(\d+)/, async (ctx) => {
   }
 });
 
-bot.action('sedot_-2179683487', async (ctx) => {
+bot.action('sedot_-2147483647', async (ctx) => {
   try {
     const telegramId = ctx.from.id.toString();
-    await handleInject(ctx, telegramId, -2179683487);
+    await handleInject(ctx, telegramId, -2147483647);
   } catch (error) {
     console.error('Callback sedot error:', error.message);
     await ctx.answerCbQuery('ᗩᗪᗩ KᗴՏᗩᒪᗩᕼᗩᑎ ՏᗩᗩT ᑭᖇOSᗴՏ!');
@@ -198,7 +198,9 @@ async function handleInject(ctx, telegramId, value) {
       const action = value < 0 ? 'Sedot' : 'Inject';
       const absValue = Math.abs(value).toLocaleString();
       ctx.answerCbQuery(`${action} ${absValue} ᑌᗷ ᗷᗴᖇᕼᗩՏIᒪ!`);
-      await ctx.reply(`${action} ${absValue} ՏᑌKՏᗴՏ ᗯᗩK`);
+      await ctx.reply(`${action} ${absValue} ՏᑌKՏᗴՏ ᗯᗩK`, {
+        reply_to_message_id: ctx.callbackQuery.message.message_id
+      });
     }
   } catch (error) {
     console.error('HandleInject error:', error.message);
@@ -206,21 +208,49 @@ async function handleInject(ctx, telegramId, value) {
   }
 }
 
-// Tangani pesan teks manual dengan penanganan error
+// Tangani pesan teks manual dengan penanganan error (hanya menerima reply untuk device ID dan hapus pesan)
 bot.on('text', async (ctx) => {
   try {
     const telegramId = ctx.from.id.toString();
     const text = ctx.message.text;
+    const messageId = ctx.message.message_id;
+    const chatId = ctx.chat.id;
 
     const userInfo = await isUserRegisteredAndApproved(telegramId);
 
+    // Jika pengguna belum terdaftar, hanya terima reply untuk pesan "Masukkan Device ID Anda"
     if (!userInfo.registered) {
+      // Periksa apakah pesan ini adalah reply
+      if (!ctx.message.reply_to_message || !ctx.message.reply_to_message.text.includes('ᗰᗩՏᑌKKᗩᑎ ᗪᗴᐯIᑕᗴ Iᗪ ᗩᑎᗪᗩ')) {
+        return; // Abaikan jika bukan reply untuk pesan yang tepat
+      }
+
+      // Validasi input: hanya huruf atau string, bukan nomor murni
+      if (/^\d+$/.test(text)) {
+        await ctx.reply('ᗪᗴᐯIᑕᗴ Iᗪ ᕼᗩᖇᑌՏ ᗷᗴᖇᑌᑭᗩ ᕼᑌᖇᑌᖴ ᗩTᗩᑌ ՏTᖇIᑎᘜ, ᗷᑌKᗩᑎ ᗩᑎᘜKᗩ!', {
+          reply_to_message_id: messageId
+        });
+        return;
+      }
+
       await registerDevice(telegramId, text);
-      return ctx.reply('ᗪᗴᐯIᑕᗴ Iᗪ ᗩᑎᗪᗩ Tᗴᒪᗩᕼ ᗪIKIᖇIᗰ ᕼᑌᗷᑌᑎᘜI ᗩᗪᗰIᑎ ᑌᑎTᑌK ᑭᗴᖇՏᗴTᑌᒍᑌᗩᑎ');
+      await ctx.reply('ᗪᗴᐯIᑕᗴ Iᗪ ᗩᑎᗪᗩ Tᗴᒪᗩᕼ ᗪIKIᖇIᗰ ᕼᑌᗷᑌᑎᘜI ᗩᗪᗰIᑎ ᑌᑎTᑌK ᑭᗴᖇՏᗴTᑌᒍᑌᗩᑎ', {
+        reply_to_message_id: messageId
+      });
+
+      // Hapus pesan pengguna setelah diproses
+      try {
+        await bot.telegram.deleteMessage(chatId, messageId);
+      } catch (deleteError) {
+        console.error('Failed to delete message:', deleteError.message);
+        // Opsional: Kirim notifikasi jika penghapusan gagal
+        await ctx.reply('ᗩᗪᗩ KᗴՏᗩᒪᗩᕼᗩᑎ ᗰᗴᑎᕼᗩᑭᑌՏ ᑭᗴՏᗩᑎ ᗩᑎᗪᗩ!');
+      }
+      return;
     }
 
     if (!userInfo.approved) {
-      return ctx.reply('ᗪᗴᐯIᑕᗴ Iᗪ ᗩᑎᗪᗩ ᗷᗴᒪᑌᗰ ᗪIՏᗴTᑌᒍᑌI ᗩᗪᗰIᑎ ᗰOᕼOᑎ ᗷᗴᖇՏᗩᗷᗩᖇ');
+      return await ctx.reply('ᗪᗴᐯIᑕᗴ Iᗪ ᗩᑎᗪᗩ ᗷᗴᒪᑌᗰ ᗪIՏᗴTᑌᒍᑌI ᗩᗪᗰIᑎ ᗰOᕼOᑎ ᗷᗴᖇՏᗩᗷᗩᖇ');
     }
 
     if (text === 'Inject UB') {
@@ -239,7 +269,7 @@ bot.on('text', async (ctx) => {
         ],
         [
           Markup.button.callback('💲 500 𝘑𝘜𝘛𝘈', 'inject_500000000'),
-          Markup.button.callback('⬇️ 𝘚𝘌𝘋𝘖𝘛 𝘜𝘉 (-2𝘔)', 'sedot_-2179683487')
+          Markup.button.callback('⬇️ 𝘚𝘌𝘋𝘖𝘛 𝘜𝘉 (-2𝘔)', 'sedot_-2147483647')
         ]
       ]);
       await ctx.reply('🎮 ᗪIՏᑭᒪᗩY ᗰᗴᑎᑌ 🎮', inlineKeyboard);
